@@ -21,7 +21,10 @@ print(f"Detected OS: {system}")
 if shutil.which("yt-dlp"):
     print("✅ yt-dlp is already installed.")
     YTDLP_INSTALLED = True
-    process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW)
+    if platform != "Windows":
+        process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE)
+    else:
+        process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW)
     ytdlp_version = process.stdout.strip()
 else:
     print("❌ yt-dlp not found. Attempting to download...")
@@ -215,7 +218,10 @@ def main(page:Page) -> None:
             cmd.append(url)
 
             try:
-                process = subprocess.Popen(cmd,bufsize=1,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,creationflags=subprocess.CREATE_NO_WINDOW)
+                if platform != "Windows":
+                    process = subprocess.Popen(cmd,bufsize=1,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
+                else:
+                    process = subprocess.Popen(cmd,bufsize=1,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,creationflags=subprocess.CREATE_NO_WINDOW)
                 while True:
                     output = process.stdout.readline()
                     if output == "" and process.poll() is not None:
