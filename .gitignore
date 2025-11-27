@@ -1,6 +1,8 @@
 dist/
 build/
 venv/
+storage/
 *.zip
 *.spec
 *.exe
+*.json

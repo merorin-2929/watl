@@ -21,7 +21,7 @@ print(f"Detected OS: {system}")
 if shutil.which("yt-dlp"):
     print("✅ yt-dlp is already installed.")
     YTDLP_INSTALLED = True
-    if platform != "Windows":
+    if platform.system() != "Windows":
         process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE)
     else:
         process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW)
@@ -31,6 +31,9 @@ else:
     YTDLP_INSTALLED = False
 
 def get_profiles_browser(browser_key: str) -> List[Dict[str,str]]:
+    """
+    Firefox及びFirefox派生のブラウザからプロファイルを取得するやつ
+    """
     if browser_key not in ("firefox","floorp"):
         return []
     display_name = "Firefox" if browser_key == "firefox" else "Floorp"
@@ -124,6 +127,10 @@ def main(page:Page) -> None:
             page.update()
     
     def download_yt_dlp(e):
+        """
+        yt-dlpのダウンロード.
+        Nightly Releaseを使用する.
+        """
 
         if not YTDLP_INSTALLED:
             page.close(check_modal)
@@ -174,6 +181,9 @@ def main(page:Page) -> None:
 
     # ダウンロード処理
     def download(e):
+        """
+        ダウンロード処理
+        """
         url = url_input.value
         output_path = output_path_input.value
         selected_browser = cookies_browser_dropdown.value
@@ -200,11 +210,8 @@ def main(page:Page) -> None:
                 "yt-dlp",
                 "--no-warnings","--newline","--no-colors",
                 "--progress-template",progress_template,
-                "-f","bestaudio/best",
-                "-x","--audio-format","mp3","--audio-quality","0",
                 "--embed-metadata",
-                "--embed-thumbnail","--convert-thumbnails","jpg",
-                "--postprocessor-args","ThumbnailsConvertor:-qmin 1 -q:v 1 -vf crop=\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\""
+                "--embed-thumbnail","--convert-thumbnails","jpg"
             ]
 
             if selected_browser:
@@ -214,11 +221,26 @@ def main(page:Page) -> None:
                     if profile_path:
                         cmd.extend(["--cookies-from-browser",f"firefox:{profile_path}"])
 
-            cmd.extend(["-o",f"{output_path}/%(title)s.%(ext)s"])
+            # サービスによって自動で
+            if 'music.youtube.com' in url:
+                cmd.extend(["-f","bestaudio/best","-x","--audio-format","mp3","--audio-quality","0","--postprocessor-args","ThumbnailsConvertor:-qmin 1 -q:v 1 -vf crop=\"'if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\""])
+                if 'list=' in url:
+                    cmd.extend(["-o",f"{output_path}/%(album)s/%(playlist_index)02d - %(title)s.%(ext)s","--parse-metadata","%(playlist_index)s/%(n_entries)s:%(track_number)s","--parse-metadata", "%(upload_date).4s:%(meta_date)s","--parse-metadata", "%(creators.0)s:%(album_artist)s"])
+                else:
+                    cmd.extend(["-o",f"{output_path}/%(title)s.%(ext)s"])
+            elif 'youtube.com' in url:
+                cmd.extend(["-f","bestvideo[ext=mp4]+bestaudio[ext=m4a]/best","--merge-output-format","mp4"])
+                if 'list=' in url:
+                    cmd.extend(["-o",f"{output_path}/%(playlist_title)s/%(title)s.%(ext)s"])
+                else:
+                    cmd.extend(["-o",f"{output_path}/%(title)s.%(ext)s"])
+            else:
+                cmd.extend(["-f","best","--merge-output-format","mp4"])
+            
             cmd.append(url)
 
             try:
-                if platform != "Windows":
+                if platform.system() != "Windows":
                     process = subprocess.Popen(cmd,bufsize=1,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True)
                 else:
                     process = subprocess.Popen(cmd,bufsize=1,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,creationflags=subprocess.CREATE_NO_WINDOW)
