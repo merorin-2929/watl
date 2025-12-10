@@ -50,6 +50,18 @@ Firefoxは`--cookies-from-browser firefox`で読み込めますがFloorpはこ�
 
 対応しているのはFirefox,Floorpのみです。
 
+## エラーでダウンロードできない場合
+
+yt-dlpの仕様変更により一部サイトからのダウンロードには、`yt-dlp-ejs`及び`deno`が必要になっています。  
+pipを使用して、`yt-dlp-ejs`をインストールしてください。
+
+```bash
+pip install yt-dlp-ejs
+```
+
+その後、システムにdenoをインストールしてください。  
+インストール方法に関しては[公式サイト](https://deno.com)をご確認ください。
+
 ## 更新履歴
 
 ### v0.0.2 (2025-11-27)
