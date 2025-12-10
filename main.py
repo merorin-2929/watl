@@ -34,7 +34,7 @@ def get_profiles_browser(browser_key: str) -> List[Dict[str,str]]:
     """
     Firefox及びFirefox派生のブラウザからプロファイルを取得するやつ
     """
-    if browser_key not in ("firefox","floorp"):
+    if browser_key not in ("firefox","floorp","zen"):
         return []
     display_name = "Firefox" if browser_key == "firefox" else "Floorp"
     browser_names = [display_name]
@@ -48,6 +48,8 @@ def get_profiles_browser(browser_key: str) -> List[Dict[str,str]]:
                 candidates.append(Path(appdata) / "Mozilla" / "Firefox")
             elif browser_key == "floorp":
                 candidates.append(Path(appdata) / "Floorp")
+            elif browser_key == "zen":
+                candidates.append(Path(appdata) / "zen")
     elif system == "Darwin":
         home = Path.home()
         name = "Firefox" if browser_key == "firefox" else "Floorp"
@@ -60,6 +62,8 @@ def get_profiles_browser(browser_key: str) -> List[Dict[str,str]]:
         if browser_key == "floorp":
             candidates.append(home / ".floorp" / "Profiles")
             candidates.append(home / ".floorp")
+        elif browser_key == "zen":
+            candidates.append(home / ".zen")
     else:
         return []
     
@@ -305,7 +309,7 @@ def main(page:Page) -> None:
             page.update()
             return
 
-        if selected_browser not in ("firefox", "floorp"):
+        if selected_browser not in ("firefox", "floorp","zen"):
             page.open(SnackBar(Text(f"選択したブラウザー({selected_browser})はプロファイル検索に対応していません。")))
             page.update()
             return
@@ -331,7 +335,7 @@ def main(page:Page) -> None:
         dialog_title="保存先を選択",initial_directory=output_path_input.value
     ))
 
-    cookies_browser_dropdown = Dropdown(label="ブラウザー",options=[DropdownOption(key="chrome",text="Chrome"),DropdownOption(key="brave",text="Brave"),DropdownOption(key="firefox",text="Firefox"),DropdownOption(key="floorp",text="Floorp")],expand=1,on_change=on_search_profiles)
+    cookies_browser_dropdown = Dropdown(label="ブラウザー",options=[DropdownOption(key="chrome",text="Chrome"),DropdownOption(key="brave",text="Brave"),DropdownOption(key="firefox",text="Firefox"),DropdownOption(key="floorp",text="Floorp"),DropdownOption(key="zen",text="Zen Browser")],expand=1,on_change=on_search_profiles)
     cookies_profile_dropdown = Dropdown(label="プロファイル",options=[],expand=1)
     load_profile_btn = TextButton(text="プロファイルを検索",icon=Icons.SEARCH,on_click=on_search_profiles)
 
