@@ -15,16 +15,20 @@ DEFAULTDIR = os.path.abspath(os.path.join(HOMEDIR,"Music"))
 YTDLP_INSTALLED = bool(False)
 ytdlp_version = str("")
 
+YTDLP_PATH = str("")
+
 system = platform.system()
 print(f"Detected OS: {system}")
 
-if shutil.which("yt-dlp"):
+yt_dlp_path = shutil.which("yt-dlp")
+if yt_dlp_path:
     print("✅ yt-dlp is already installed.")
     YTDLP_INSTALLED = True
+    YTDLP_PATH = yt_dlp_path
     if platform.system() != "Windows":
-        process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE)
+        process = subprocess.run(args=[YTDLP_PATH,"--version"],text=True,check=True,stdout=subprocess.PIPE)
     else:
-        process = subprocess.run(args=["yt-dlp","--version"],text=True,check=True,stdout=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW)
+        process = subprocess.run(args=[YTDLP_PATH,"--version"],text=True,check=True,stdout=subprocess.PIPE,creationflags=subprocess.CREATE_NO_WINDOW)
     ytdlp_version = process.stdout.strip()
 else:
     print("❌ yt-dlp not found. Attempting to download...")
@@ -211,7 +215,7 @@ def main(page:Page) -> None:
             progress_template = "[DOWNLOADING]:%(progress._percent)s\t%(info.title)s"
             
             cmd = [
-                "yt-dlp",
+                YTDLP_PATH if YTDLP_PATH else "yt-dlp",
                 "--no-warnings","--newline","--no-colors",
                 "--progress-template",progress_template,
                 "--embed-metadata",
